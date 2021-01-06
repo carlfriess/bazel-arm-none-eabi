@@ -19,19 +19,6 @@ def _impl(ctx):
         wrapper_path(ctx, "strip"),
     ]
 
-    include_flags = [
-        "-I",
-        "external/{}/arm-none-eabi/include".format(ctx.attr.gcc_repo),
-        "-I",
-        "external/{}/lib/gcc/arm-none-eabi/{}/include".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
-        "-I",
-        "external/{}/lib/gcc/arm-none-eabi/{}/include-fixed".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
-        "-I",
-        "external/{}/arm-none-eabi/include/c++/{}/".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
-        "-I",
-        "external/{}/arm-none-eabi/include/c++/{}/arm-none-eabi/".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
-    ]
-
     linker_flags = [
         "-L",
         "external/{}/arm-none-eabi/lib".format(ctx.attr.gcc_repo),
@@ -40,30 +27,6 @@ def _impl(ctx):
         "-llibc.a",
         "-llibgcc.a",
     ]
-
-    toolchain_compiler_flags = feature(
-        name = "compiler_flags",
-        enabled = True,
-        flag_sets = [
-            flag_set(
-                actions = [
-                    ACTION_NAMES.assemble,
-                    ACTION_NAMES.preprocess_assemble,
-                    ACTION_NAMES.linkstamp_compile,
-                    ACTION_NAMES.c_compile,
-                    ACTION_NAMES.cpp_compile,
-                    ACTION_NAMES.cpp_header_parsing,
-                    ACTION_NAMES.cpp_module_compile,
-                    ACTION_NAMES.cpp_module_codegen,
-                    ACTION_NAMES.lto_backend,
-                    ACTION_NAMES.clif_match,
-                ],
-                flag_groups = [
-                    flag_group(flags = include_flags),
-                ],
-            ),
-        ],
-    )
 
     toolchain_linker_flags = feature(
         name = "linker_flags",
@@ -92,8 +55,14 @@ def _impl(ctx):
         abi_libc_version = ctx.attr.gcc_version,
         tool_paths = tool_paths,
         features = [
-            toolchain_compiler_flags,
             toolchain_linker_flags,
+        ],
+        cxx_builtin_include_directories = [
+            "external/{}/arm-none-eabi/include".format(ctx.attr.gcc_repo),
+            "external/{}/lib/gcc/arm-none-eabi/{}/include".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
+            "external/{}/lib/gcc/arm-none-eabi/{}/include-fixed".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
+            "external/{}/arm-none-eabi/include/c++/{}/".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
+            "external/{}/arm-none-eabi/include/c++/{}/arm-none-eabi/".format(ctx.attr.gcc_repo, ctx.attr.gcc_version),
         ],
     )
 
