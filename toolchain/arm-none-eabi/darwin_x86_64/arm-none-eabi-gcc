@@ -1,3 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 external/arm_none_eabi_darwin_x86_64/bin/arm-none-eabi-gcc "$@"
+
+# Workaround to remove prefixes from absolute paths in dependency file.
+# GCC sometimes produces absolute paths to included system headers.
+# Unfortunately, Bazel does not correctly handle absolute paths.
+if [[ $@ == *"-MF"* ]]; then
+	FILE=$(echo "$@" | grep -Eo "\S+\.d" --)
+	sed -e "s/ \/.*\/external/external/g" -i .backup $FILE
+fi
